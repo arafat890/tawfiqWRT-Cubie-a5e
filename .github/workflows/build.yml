@@ -1,0 +1,52 @@
+name: Build TawfiqWRT Cubie A5E
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Initialization Environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano p7zip p7zip-full patch pkgconf python3 python3-pip python3-ply python3-docutils qemu-utils rsync sudo subversion swig texinfo u-boot-tools upx-ucl unzip vim wget xmlto xz-utils zlib1g-dev libz-dev
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+
+      - name: Clone OpenWrt & Radxa Profiles
+        run: |
+          # মূল ওপেনডাব্লিউআরটি সোর্স ক্লোন করা হচ্ছে
+          git clone --depth 1 https://github.com/openwrt/openwrt.git openwrt
+          # রাডক্সা বোর্ডের প্রোফাইল আলাদা ফোল্ডারে ক্লোন করা হচ্ছে
+          git clone --depth 1 https://github.com/Misaka-Nnnnq/Radxa_A5E_Firmware.git radxa_source
+
+      - name: Sync Feeds & Load Radxa Config
+        run: |
+          cd openwrt
+          # ওপেনডাব্লিউআরটি-এর প্যাকেজ ফিড আপডেট করা
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          
+          # অফিশিয়াল রাডক্সা প্রোফাইল থেকে কনফিগারেশন ফাইল আপনার বিল্ডে কপি করা হচ্ছে
+          cp ../radxa_source/seed/cubie-a5e.seed .config || cp ../radxa_source/seed/cubieboard2.seed .config || true
+          make defconfig
+
+      - name: Compile Firmware
+        run: |
+          cd openwrt
+          echo -e "$(nproc) thread compile"
+          # দ্রুত বিল্ডের জন্য মাল্টি-থ্রেড, ফেইল হলে অটো সিঙ্গেল থ্রেড সেফ মোড
+          make -j$(nproc) || make -j1 V=s
+
+      - name: Upload Firmware Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TawfiqWRT-CubieA5E-Image
+          path: openwrt/bin/targets/
