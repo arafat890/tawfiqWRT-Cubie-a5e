@@ -1,0 +1,23 @@
+.github/workflows/build.yml
+name: Build TawfiqWRT Cubie A5E
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Clone Kwrt and Add Drivers
+        run: |
+          git clone https://github.com/kiddin9/Kwrt.git openwrt
+          cd openwrt
+          git clone -b allwinner-aiot-linux-5.15 https://github.com/radxa/kernel.git
+          git clone https://github.com/Misaka-Nnnnq/Radxa_A5E_Firmware.git
+
+      - name: Compile Stable Firmware
+        run: |
+          echo "Your custom stable build is starting..."
