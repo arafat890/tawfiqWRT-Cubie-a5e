@@ -1,0 +1,47 @@
+name: Build Genuine TawfiqWRT Cubie A5E (Misaka Source)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Initialization Environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano p7zip p7zip-full patch pkgconf python3 python3-pip python3-ply python3-docutils qemu-utils rsync sudo subversion swig texinfo u-boot-tools upx-ucl unzip vim wget xmlto xz-utils zlib1g-dev libz-dev
+
+      - name: Clone Misaka Radxa A5E Source
+        run: |
+          # অফিশিয়াল সোর্সের বদলে ডেভলপারের আসল সোর্স ক্লোন করা হচ্ছে
+          git clone --depth 1 https://github.com/Misaka-Nnnnq/Radxa_A5E_Firmware.git openwrt
+
+      - name: Update & Install Feeds
+        run: |
+          cd openwrt
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Load Defconfig & Enforce A527
+        run: |
+          cd openwrt
+          # ডেভলপারের সোর্সে থাকা আসল অলউইনার A527 ও Kwrt/OpenWrt কনফিগ জেনারেট করা
+          make defconfig
+
+      - name: Compile Firmware
+        run: |
+          cd openwrt
+          make -j$(nproc) || make -j1 V=s
+
+      - name: Upload Genuine Cubie A5E Firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: TawfiqWRT-Misaka-A5E
+          path: openwrt/bin/targets/
