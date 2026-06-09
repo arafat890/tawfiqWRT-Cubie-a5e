@@ -1,0 +1,16 @@
+#!/bin/sh
+# Set Argon as default LuCI theme
+uci set luci.main.mediaurlbase='/luci-static/argon'
+uci commit luci
+
+# Set default hostname
+uci set system.@system[0].hostname='CubieA5E'
+uci set system.@system[0].timezone='BDT-6'
+uci set system.@system[0].zonename='Asia/Dhaka'
+uci commit system
+
+# Set default LAN IP
+uci set network.lan.ipaddr='192.168.1.1'
+uci commit network
+
+exit 0
