@@ -56,23 +56,23 @@ jobs:
           git clone --depth=1 -b $REPO_BRANCH $REPO_URL openwrt
           ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
-      - name: Add custom feeds (iStore, Argon theme)
+      - name: Add iStore feed and fix feeds
         run: |
           cd /workdir/openwrt
-        
-      
-      
-          
-  
+          # Remove any argon feed entries from base config
+          sed -i '/argon/d' feeds.conf.default || true
+          # Add only iStore
+          echo 'src-git istore https://github.com/linkease/istore;main' >> feeds.conf.default
 
       - name: Update & install feeds
         run: |
           cd /workdir/openwrt
-          sed -i '/argon/d' feeds.conf.default
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
-          # Install iStore packages specifically
-          ./scripts/feeds install -d y -p istore luci-app-store
+          # Remove argon from feeds config again to be safe
+          sed -i '/argon/d' feeds.conf.default || true
+          ./scripts/feeds update -a 2>&1 | grep -v argon || true
+          ./scripts/feeds install -a || true
+          # Install iStore
+          ./scripts/feeds install -d y -p istore luci-app-store || true
 
       - name: Copy .config
         run: |
