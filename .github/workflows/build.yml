@@ -68,6 +68,7 @@ jobs:
       - name: Update & install feeds
         run: |
           cd /workdir/openwrt
+          sed -i '/argon/d' feeds.conf.default
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           # Install iStore packages specifically
