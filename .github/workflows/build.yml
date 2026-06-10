@@ -62,8 +62,8 @@ jobs:
           # iStore App Store
           echo 'src-git istore https://github.com/linkease/istore;main' >> feeds.conf.default
           echo 'src-git istore_ui https://github.com/linkease/istore-ui;main' >> feeds.conf.default
-          # Argon theme
-          defaultecho 'src-git argon https://github.com/jerrykuku/luci-theme-argon;v2.3.1' >> feeds.conf.default
+          
+  
 
       - name: Update & install feeds
         run: |
