@@ -59,9 +59,9 @@ jobs:
       - name: Add custom feeds (iStore, Argon theme)
         run: |
           cd /workdir/openwrt
-          # iStore App Store
-          echo 'src-git istore https://github.com/linkease/istore;main' >> feeds.conf.default
-          echo 'src-git istore_ui https://github.com/linkease/istore-ui;main' >> feeds.conf.default
+        
+      
+      
           
   
 
